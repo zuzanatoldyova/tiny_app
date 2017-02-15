@@ -20,7 +20,10 @@ app.use(cookieParser());
 
 
 app.get('/urls', (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    username: req.cookies["name"],
+    urls: urlDatabase
+  };
   res.render('urls_index', templateVars);
 });
 
@@ -32,14 +35,19 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username: req.cookies["name"]
+  }
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
+    username: req.cookies["name"],
     shortURL: req.params.id,
     fullURL: urlDatabase[req.params.id]
    };
+   console.log(templateVars);
   res.render("urls_show", templateVars);
 });
 
@@ -55,7 +63,12 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('name', req.body.username);
+  res.cookie("name", req.body.username);
+  res.redirect("/");
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("name", req.body.username);
   res.redirect("/");
 });
 

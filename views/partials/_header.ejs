@@ -1,7 +1,27 @@
 <!DOCTYPE html>
 <h3>TinyApp</h3>
-<form action="/login" method="POST">
-  <label for="user"></label>
-  <input id="user" type="text" name="username" value="username">
-  <input type="submit" value="Sign in">
-</form>
+<table>
+  <tr>
+    <td>
+      <% if(username){ %>
+        <td>
+          <form action="/logout" method="POST">
+            <label for="user"></label>
+            <input type="submit" value="Log out">
+          </form>
+        </td>
+        <td>
+          "hello <%= username %>"
+        </td>
+      <% } else { %>
+        <td>
+          <form action="/login" method="POST">
+            <label for="user"></label>
+            <input id="user" type="text" name="username" value="username">
+            <input type="submit" value="Sign in">
+          </form>
+        </td>
+
+      <% } %>
+  </tr>
+</table>
