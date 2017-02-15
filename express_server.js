@@ -8,7 +8,7 @@ const s = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
 
-var urlDatabase = {
+const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
@@ -33,15 +33,19 @@ app.get("/urls/:id", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase.shortURL = req.body.longURL;
-  console.log(req.body.longURL);  // debug statement to see POST parameters
+  urlDatabase[shortURL]  = 'http://' + req.body.longURL;
+  // console.log(urlDatabase);
   res.send(`This is a shortURL ${shortURL} for ${req.body.longURL}`);         // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
-  console.log(res.statusCode);
+  if (!longURL) {
+    res.status(404).end('<html><body>url does not exist</body></html>\n');
+  } else {
+    res.redirect(longURL);
+  }
+  // console.log(res.statusCode);
 });
 
 app.get('/', (req, res) => {
@@ -66,5 +70,5 @@ function generateRandomString() {
   }).join('');
 }
 
-console.log();
+
 
