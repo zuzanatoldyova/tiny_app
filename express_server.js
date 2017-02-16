@@ -124,7 +124,7 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL][req.params.shortURL];
   if (!longURL) {
     res.status(404).end('<html><body>url does not exist</body></html>\n');
   } else {
