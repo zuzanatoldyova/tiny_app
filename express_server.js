@@ -32,8 +32,11 @@ app.use(cookieParser());
 
 
 app.get('/urls', (req, res) => {
+  // console.log(users[req.cookies["name"]]);
+  // console.log(users[req.cookies.userId]);
+  // console.log(req.cookies.userId);
   let templateVars = {
-    username: req.cookies["name"],
+    user: users[req.cookies.userId],
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
@@ -52,14 +55,14 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["name"]
+    user: users[req.cookies.userId]
   }
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    username: req.cookies["name"],
+    user: users[req.cookies.userId],
     shortURL: req.params.id,
     fullURL: urlDatabase[req.params.id]
    };
@@ -82,14 +85,26 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/login", (req, res) => {
+  res.render("login_form"); //or home?
+});
+
 app.post("/login", (req, res) => {
-  res.cookie("name", req.body.username);
-  res.redirect("/urls"); //or home?
+  for (let user in users) {
+    if (req.body.email === users[user].email) {
+      if (req.body.password === users[user].password) {
+        res.cookie("userId", user);
+          res.redirect("/"); //or home?
+        return;
+      }
+    }
+  }
+  res.status(403).send("Invalid credentials.");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("name");
-  res.redirect("/urls"); //or home?
+  res.clearCookie("userId");
+  res.redirect("/"); //or home?
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -121,7 +136,7 @@ app.post("/register", (req, res) => {
       password: req.body.password
     };
     console.log(users);
-    res.cookie("name", newUserId);
+    res.cookie("userId", newUserId);
     res.redirect("/");
   }
 });
