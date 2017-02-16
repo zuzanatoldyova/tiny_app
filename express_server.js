@@ -54,10 +54,14 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    user: users[req.cookies.userId]
+  if (req.cookies.userId) {
+    let templateVars = {
+      user: users[req.cookies.userId]
+    }
+    res.render("urls_new", templateVars);
+    return;
   }
-  res.render("urls_new", templateVars);
+  res.redirect("/login");
 });
 
 app.get("/urls/:id", (req, res) => {
