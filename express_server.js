@@ -68,7 +68,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("name", req.body.username);
+  res.clearCookie("name");
   res.redirect("/");
 });
 

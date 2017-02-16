@@ -4,23 +4,19 @@
   <tr>
     <td>
       <% if(username){ %>
-        <td>
+        <div>
           <form action="/logout" method="POST">
-            <label for="user"></label>
             <input type="submit" value="Log out">
-          </form>
-        </td>
-        <td>
-          "hello <%= username %>"
-        </td>
+            <span> "hello <%= username %>" </span>
+        </div>
       <% } else { %>
-        <td>
+        <div>
           <form action="/login" method="POST">
             <label for="user"></label>
             <input id="user" type="text" name="username" value="username">
             <input type="submit" value="Sign in">
           </form>
-        </td>
+        </div>
 
       <% } %>
   </tr>
