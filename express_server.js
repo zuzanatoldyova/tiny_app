@@ -7,9 +7,16 @@ const cookieParser = require('cookie-parser')
 
 const s = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  "b2xVn2": {
+    "b2xVn2": "http://www.lighthouselabs.ca",
+    userId: "userRandomID"
+  },
+  "9sm5xK" : {
+    "9sm5xK": "http://www.google.com",
+    userId: "user2RandomID"
+  }
 };
+
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -21,7 +28,7 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 app.set('view engine', 'ejs');
 
@@ -31,22 +38,24 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 
-app.get('/urls', (req, res) => {
-  // console.log(users[req.cookies["name"]]);
-  // console.log(users[req.cookies.userId]);
-  // console.log(req.cookies.userId);
+app.get("/urls", (req, res) => {
+  let userUrls = findUserUrls(req.cookies.userId);
+  console.log(userUrls);
   let templateVars = {
     user: users[req.cookies.userId],
-    urls: urlDatabase
+    urls: userUrls
   };
   res.render('urls_index', templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
   if (req.body.longURL) {
-    let update = checkHTTP(req.body.longURL);
-    urlDatabase[shortURL] = update;
+    let shortURL = generateRandomString();
+    let longURL = checkHTTP(req.body.longURL);
+    urlDatabase[shortURL] = {
+      [shortURL]: longURL,
+      userId: req.cookies.userId
+    };
     res.redirect("/urls");
   } else {
     res.redirect("/urls/new");
@@ -68,7 +77,7 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     user: users[req.cookies.userId],
     shortURL: req.params.id,
-    fullURL: urlDatabase[req.params.id]
+    fullURL: urlDatabase[req.params.id][req.params.id]
    };
    console.log(templateVars);
   res.render("urls_show", templateVars);
@@ -77,7 +86,10 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   if (req.body.update) {
     let update = checkHTTP(req.body.update);
-    urlDatabase[req.params.id] = update;
+    urlDatabase[req.params.id] = {
+      [req.params.id]: update,
+      userId: req.cookies.userId
+    };
     res.redirect("/urls");
   } else {
     res.redirect(`/urls/${req.params.id}`);
@@ -172,6 +184,20 @@ function checkHTTP(input) {
     input = 'http://' + input;
   }
   return input;
+}
+
+function findUserUrls(userId) {
+  let userUrls = {};
+  if (!userId) {
+    return undefined;
+  }
+  for (let url in urlDatabase) {
+    console.log(urlDatabase[url].userId);
+    if (urlDatabase[url].userId === userId) {
+      userUrls[url] = urlDatabase[url];
+    }
+  }
+  return userUrls;
 }
 
 app.listen(PORT, () => {

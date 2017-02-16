@@ -10,7 +10,7 @@
     <table class="table" style="margin-top: 20px">
       <% for (let url in urls) { %>
       <tr>
-        <td><a href="<%= urls[url] %>"><%= urls[url] %></a></td>
+        <td><a href="<%= urls[url][url] %>"><%= urls[url][url] %></a></td>
         <td><a href="/u/<%= url %>"><%= url %></a></td>
         <td>
           <a href="/urls/<%= url%>"> Edit</a>
