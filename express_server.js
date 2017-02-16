@@ -29,9 +29,13 @@ app.get('/urls', (req, res) => {
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  let update = checkHTTP(req.body.longURL);
-  urlDatabase[shortURL] = update;
-  res.redirect("/urls"); // will change later
+  if (req.body.longURL) {
+    let update = checkHTTP(req.body.longURL);
+    urlDatabase[shortURL] = update;
+    res.redirect("/urls");
+  } else {
+    res.redirect("/urls/new");
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -64,12 +68,12 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/login", (req, res) => {
   res.cookie("name", req.body.username);
-  res.redirect("/");
+  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("name");
-  res.redirect("/");
+  res.redirect("/urls");
 });
 
 app.get("/u/:shortURL", (req, res) => {

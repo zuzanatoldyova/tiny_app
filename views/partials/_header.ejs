@@ -3,11 +3,12 @@
 <table>
   <tr>
     <td>
-      <% if(username){ %>
+      <% if(username) { %>
         <div>
           <form action="/logout" method="POST">
             <input type="submit" value="Log out">
             <span> "hello <%= username %>" </span>
+          </form>
         </div>
       <% } else { %>
         <div>
