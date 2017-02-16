@@ -56,9 +56,13 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  let update = checkHTTP(req.body.update);
-  urlDatabase[req.params.id] = update;
-  res.redirect("/urls"); // will change later
+  if (req.body.update) {
+    let update = checkHTTP(req.body.update);
+    urlDatabase[req.params.id] = update;
+    res.redirect("/urls");
+  } else {
+    res.redirect(`/urls/${req.params.id}`);
+  }
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -68,12 +72,12 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/login", (req, res) => {
   res.cookie("name", req.body.username);
-  res.redirect("/urls");
+  res.redirect("/urls"); //or home?
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("name");
-  res.redirect("/urls");
+  res.redirect("/urls"); //or home?
 });
 
 app.get("/u/:shortURL", (req, res) => {
