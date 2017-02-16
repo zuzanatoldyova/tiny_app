@@ -31,6 +31,9 @@ const users = {
   }
 };
 
+const errorNotLoggedIn = '<html><body>You are not logged in <a href="/login"> Log in here </a></body></html>\n'
+// const loggedIn = req.cookies.userId;
+
 app.set('view engine', 'ejs');
 
 // Middlewares
@@ -40,13 +43,17 @@ app.use(cookieParser());
 
 
 app.get("/urls", (req, res) => {
-  let userUrls = findUserUrls(req.cookies.userId);
-  console.log(userUrls);
-  let templateVars = {
-    user: users[req.cookies.userId],
-    urls: userUrls
-  };
-  res.render('urls_index', templateVars);
+  if (req.cookies.userId) {
+    let userUrls = findUserUrls(req.cookies.userId);
+    console.log(userUrls);
+    let templateVars = {
+      user: users[req.cookies.userId],
+      urls: userUrls
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.status(401).send(errorNotLoggedIn);
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -71,17 +78,28 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_new", templateVars);
     return;
   }
-  res.redirect("/login");
+  res.status(401).send(errorNotLoggedIn);
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    user: users[req.cookies.userId],
-    shortURL: req.params.id,
-    fullURL: urlDatabase[req.params.id][req.params.id]
-   };
-   console.log(templateVars);
-  res.render("urls_show", templateVars);
+  if (req.cookies.userId) {
+    if (urlDatabase[req.params.id]) {
+      if (urlDatabase[req.params.id].userId === req.cookies.userId) {
+        let templateVars = {
+          user: users[req.cookies.userId],
+          shortURL: req.params.id,
+          fullURL: urlDatabase[req.params.id][req.params.id]
+         };
+        res.render("urls_show", templateVars);
+        return;
+      }
+      res.status(403).send("You are not authorized to modify this URL");
+      return;
+    }
+    res.status(404).send("URL does not exist");
+    return;
+  }
+  res.status(401).send(errorNotLoggedIn);
 });
 
 app.post("/urls/:id", (req, res) => {
@@ -164,8 +182,12 @@ app.get("/register", (req, res) => {
   res.render("register_form")
 });
 
-app.get('/', (req, res) => {
-  res.end('Hello!');
+app.get("/", (req, res) => {
+  if (req.cookies.userId) {
+    res.redirect("/urls");
+    return;
+  }
+  res.redirect("/login");
 });
 
 app.get('/urls.json', (req, res) => {
