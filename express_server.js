@@ -10,6 +10,18 @@ const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+}
 
 app.set('view engine', 'ejs');
 
@@ -87,6 +99,35 @@ app.get("/u/:shortURL", (req, res) => {
   } else {
     res.redirect(longURL);
   }
+});
+
+app.post("/register", (req, res) => {
+  let mistake = false;
+  if (!req.body.email || !req.body.password) {
+    mistake = true;
+    res.status(400).end("Email and password are required");
+  }
+  for (var userId in users) {
+      if (users[userId].email === req.body.email) {
+        mistake = true;
+        res.status(400).end("Email already used");
+    }
+  }
+  if (!mistake) {
+    let newUserId = generateRandomString();
+    users[newUserId] = {
+      id: newUserId,
+      email: req.body.email,
+      password: req.body.password
+    };
+    console.log(users);
+    res.cookie("name", newUserId);
+    res.redirect("/");
+  }
+});
+
+app.get("/register", (req, res) => {
+  res.render("register_form")
 });
 
 app.get('/', (req, res) => {
