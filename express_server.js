@@ -5,6 +5,7 @@ let PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const cookieSession = require("cookie-session");
+const methodOverride = require('method-override');
 
 const s = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -42,6 +43,7 @@ app.use(cookieSession({
   name: "session",
   keys: ["secret"]
 }));
+app.use(methodOverride('_method'));
 
 function generateRandomString() {
   return Array(6).join().split(',').map(function() {
@@ -130,7 +132,7 @@ app.get("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
+app.put("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
   if (req.body.update) {
     let update = ensureHTTP(req.body.update);
     urlDatabase[req.params.id] = {
@@ -141,7 +143,7 @@ app.post("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
   res.redirect(`/urls/${req.params.id}`);
 });
 
-app.post("/urls/:id/delete", checkLogin, checkUrlEdit, (req, res) => {
+app.delete("/urls/:id/delete", checkLogin, checkUrlEdit, (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });

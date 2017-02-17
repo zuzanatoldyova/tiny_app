@@ -11,12 +11,12 @@
     ShortURL : <%= shortURL %>
     </h4>
     <table>
-      <form action="/urls/<%= shortURL%>" method="POST">
+      <form action="/urls/<%= shortURL%>?_method=PUT" method="POST">
         <input id="URL" type="text" name="update" value="<%= fullURL%>" style="width: 300px">
         <input type="submit" value="Update" style="margin-left
         : 10px">
       </form>
-      <form method="POST" action="/urls/<%= shortURL%>/delete">
+      <form method="POST" action="/urls/<%= shortURL%>/delete?_method=DELETE">
         <input type="submit" value="Delete" style="margin-left
         : 10px">
       </form>
