@@ -3,7 +3,6 @@ const app = express();
 let PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
-const cookieParser = require('cookie-parser')
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 
@@ -23,12 +22,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
+    password: bcrypt.hashSync("1234", 10)
   },
  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: bcrypt.hashSync("dishwasher-funk", 10)
+    password: bcrypt.hashSync("lolo", 10)
   }
 };
 
@@ -87,26 +86,44 @@ app.get("/urls/new", (req, res) => {
   res.status(401).send(errorNotLoggedIn);
 });
 
-app.get("/urls/:id", (req, res) => {
-  // checkUrlEdit(req, res, showUrl(req, res));
-  if (req.session.userId) {
-    if (urlDatabase[req.params.id]) {
-      if (urlDatabase[req.params.id].userId === req.session.userId) {
-        let templateVars = {
-          user: users[req.session.userId],
-          shortURL: req.params.id,
-          fullURL: urlDatabase[req.params.id][req.params.id]
-         };
-        res.render("urls_show", templateVars);
-        return;
-      }
-      res.status(403).send("You are not authorized to modify this URL");
-      return;
-    }
-    res.status(404).send("URL does not exist");
-    return;
-  }
-  res.status(401).send(errorNotLoggedIn);
+app.get("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
+
+  let templateVars = {
+    user: users[req.session.userId],
+    shortURL: req.params.id,
+    fullURL: urlDatabase[req.params.id][req.params.id]
+  };
+  res.render("urls_show", templateVars);
+
+  // checkUrlEdit(req, res, showUrl);
+
+  // checkUrlEdit(req, res, (req, res) => {
+  //   let templateVars = {
+  //     user: users[req.session.userId],
+  //     shortURL: req.params.id,
+  //     fullURL: urlDatabase[req.params.id][req.params.id]
+  //   };
+  //   res.render("urls_show", templateVars);
+  // });
+
+  // if (req.session.userId) {
+  //   if (urlDatabase[req.params.id]) {
+  //     if (urlDatabase[req.params.id].userId === req.session.userId) {
+  //       let templateVars = {
+  //         user: users[req.session.userId],
+  //         shortURL: req.params.id,
+  //         fullURL: urlDatabase[req.params.id][req.params.id]
+  //        };
+  //       res.render("urls_show", templateVars);
+  //       return;
+  //     }
+  //     res.status(403).send("You are not authorized to modify this URL");
+  //     return;
+  //   }
+  //   res.status(404).send("URL does not exist");
+  //   return;
+  // }
+  // res.status(401).send(errorNotLoggedIn);
 });
 
 app.post("/urls/:id", (req, res) => {
@@ -168,10 +185,10 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL][req.params.shortURL];
-  if (!longURL) {
+  if (!urlDatabase[req.params.shortURL]) {
     res.status(404).end('<html><body>Url does not exist</body></html>\n');
   } else {
+    let longURL = urlDatabase[req.params.shortURL][req.params.shortURL];
     res.redirect(longURL);
   }
 });
@@ -255,18 +272,26 @@ function findUserUrls(userId) {
 
 // // helper function used in /urls/:id post and get request, checking sign in, existence of url and authorization to modify url
 
-// function checkUrlEdit(req, res, callback) {
-//   if (!req.session.userId) {
-//     res.status(401).send(errorNotLoggedIn);
+function checkUrlEdit(req, res, next) {
+  // if (!req.session.userId) {
+  //   res.status(401).send(errorNotLoggedIn);
+  // } else
+  if (!urlDatabase[req.params.id]) {
+    res.status(404).send("URL does not exist");
+  } else if (urlDatabase[req.params.id].userId !== req.session.userId) {
+    res.status(403).send("You are not authorized to modify this URL");
+  } else {
+    next();
+  }
+}
 
-//   } else if (!urlDatabase[req.params.id]) {
-//     res.status(404).send("URL does not exist");
-//   } else if (! urlDatabase[req.params.id].userId === req.session.userId) {
-//     res.status(403).send("You are not authorized to modify this URL");
-//   } else {
-//     callback;
-//   }
-// }
+function checkLogin(req, res, next) {
+  if (!req.session.userId) {
+    res.status(401).send(errorNotLoggedIn);
+  } else {
+    next();
+  }
+}
 
 // // helper function in /urls/:id send request, updates url in database
 
@@ -285,14 +310,14 @@ function findUserUrls(userId) {
 
 // // helper function in /urls/:id get request, setts parameters and render approtpriate url
 
-// function showUrl(req, res) {
-//   let templateVars = {
-//     user: users[req.session.userId],
-//     shortURL: req.params.id,
-//     fullURL: urlDatabase[req.params.id][req.params.id]
-//   };
-//   res.render("urls_show", templateVars);
-// }
+function showUrl(req, res) {
+  let templateVars = {
+    user: users[req.session.userId],
+    shortURL: req.params.id,
+    fullURL: urlDatabase[req.params.id][req.params.id]
+  };
+  res.render("urls_show", templateVars);
+}
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
