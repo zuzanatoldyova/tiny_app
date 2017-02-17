@@ -16,13 +16,15 @@ const urlDatabase = {
     "b2xVn2": "http://www.lighthouselabs.ca",
     userId: "userRandomID",
     visits: 0,
-    uniqueVisits: 0
+    uniqueVisits: 0,
+    record: []
   },
   "9sm5xK" : {
     "9sm5xK": "http://www.google.com",
     userId: "user2RandomID",
     visits: 0,
-    uniqueVisits: 0
+    uniqueVisits: 0,
+    record: []
   }
 };
 
@@ -114,7 +116,8 @@ app.post("/urls", checkLogin, (req, res) => {
       [shortURL]: longURL,
       userId: req.session.userId,
       visits: 0,
-      uniqueVisits: 0
+      uniqueVisits: 0,
+      record: []
     };
     res.redirect(`/urls/${shortURL}`);
   } else {
@@ -132,11 +135,10 @@ app.get("/urls/new", checkLogin, (req, res) => {
 app.get("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
   let templateVars = {
     user: users[req.session.userId],
-    shortURL: req.params.id,
-    fullURL: urlDatabase[req.params.id][req.params.id],
-    visits: urlDatabase[req.params.id].visits,
-    uniqueVisits: urlDatabase[req.params.id].uniqueVisits
+    url: urlDatabase[req.params.id],
+    shortURL: req.params.id
   };
+  console.log(templateVars);
   res.render("urls_show", templateVars);
 });
 
@@ -185,15 +187,27 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(404).end('<html><body>Url does not exist</body></html>\n');
   } else {
     let urlId = req.params.shortURL;
-    console.log(urlId);
+
     // console.log(req.session.urlId);
     if (!req.session[urlId]) {
       console.log(urlDatabase[urlId]);
       urlDatabase[urlId].uniqueVisits += 1;
       req.session[urlId] = generateRandomString();
+      urlDatabase[urlId].record.push({
+        id: req.session.userId,
+        unique: true,
+        timestamp: new Date()
+      });
+    } else {
+      urlDatabase[urlId].record.push({
+        id: req.session.userId,
+        unique: false,
+        timestamp: new Date()
+      });
     }
     let longURL = urlDatabase[req.params.shortURL][req.params.shortURL];
     urlDatabase[req.params.shortURL].visits += 1;
+    console.log(urlDatabase[req.params.shortURL]);
     res.redirect(longURL);
   }
 });
