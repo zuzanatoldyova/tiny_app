@@ -7,9 +7,18 @@
     <header>
         <% include ./partials/_header %>
     </header>
-    <h4>
-    ShortURL : <%= shortURL %>
-    </h4>
+    <table class="table">
+      <tr>
+        <th> ShortURL </th>
+        <th> Visits </th>
+        <th> Unique visitors </th>
+      </tr>
+      <tr>
+        <td><%= shortURL %></td>
+        <td><%= visits %></td>
+        <td><%= uniqueVisits %></td>
+      </tr>
+    </table>
     <table>
       <form action="/urls/<%= shortURL%>?_method=PUT" method="POST">
         <input id="URL" type="text" name="update" value="<%= fullURL%>" style="width: 300px">

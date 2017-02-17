@@ -14,11 +14,15 @@ const errorNotLoggedIn = '<html><body>You are not logged in <a href="/login"> Lo
 const urlDatabase = {
   "b2xVn2": {
     "b2xVn2": "http://www.lighthouselabs.ca",
-    userId: "userRandomID"
+    userId: "userRandomID",
+    visits: 0,
+    uniqueVisits: 0
   },
   "9sm5xK" : {
     "9sm5xK": "http://www.google.com",
-    userId: "user2RandomID"
+    userId: "user2RandomID",
+    visits: 0,
+    uniqueVisits: 0
   }
 };
 
@@ -108,7 +112,9 @@ app.post("/urls", checkLogin, (req, res) => {
     let longURL = ensureHTTP(req.body.longURL);
     urlDatabase[shortURL] = {
       [shortURL]: longURL,
-      userId: req.session.userId
+      userId: req.session.userId,
+      visits: 0,
+      uniqueVisits: 0
     };
     res.redirect(`/urls/${shortURL}`);
   } else {
@@ -127,7 +133,9 @@ app.get("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
   let templateVars = {
     user: users[req.session.userId],
     shortURL: req.params.id,
-    fullURL: urlDatabase[req.params.id][req.params.id]
+    fullURL: urlDatabase[req.params.id][req.params.id],
+    visits: urlDatabase[req.params.id].visits,
+    uniqueVisits: urlDatabase[req.params.id].uniqueVisits
   };
   res.render("urls_show", templateVars);
 });
@@ -135,10 +143,7 @@ app.get("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
 app.put("/urls/:id", checkLogin, checkUrlEdit, (req, res) => {
   if (req.body.update) {
     let update = ensureHTTP(req.body.update);
-    urlDatabase[req.params.id] = {
-      [req.params.id]: update,
-      userId: req.session.userId
-    };
+    urlDatabase[req.params.id][req.params.id] = update;
   }
   res.redirect(`/urls/${req.params.id}`);
 });
@@ -179,7 +184,16 @@ app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
     res.status(404).end('<html><body>Url does not exist</body></html>\n');
   } else {
+    let urlId = req.params.shortURL;
+    console.log(urlId);
+    // console.log(req.session.urlId);
+    if (!req.session[urlId]) {
+      console.log(urlDatabase[urlId]);
+      urlDatabase[urlId].uniqueVisits += 1;
+      req.session[urlId] = generateRandomString();
+    }
     let longURL = urlDatabase[req.params.shortURL][req.params.shortURL];
+    urlDatabase[req.params.shortURL].visits += 1;
     res.redirect(longURL);
   }
 });
