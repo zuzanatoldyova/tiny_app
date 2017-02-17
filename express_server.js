@@ -33,7 +33,6 @@ const users = {
 };
 
 const errorNotLoggedIn = '<html><body>You are not logged in <a href="/login"> Log in here </a></body></html>\n'
-// const loggedIn = req.cookies.userId;
 
 app.set('view engine', 'ejs');
 
@@ -68,7 +67,6 @@ app.post("/urls", (req, res) => {
         [shortURL]: longURL,
         userId: req.session.userId
       };
-      console.log(shortURL);
       res.redirect(`/urls/${shortURL}`);
     } else {
       res.redirect("/urls/new");
@@ -146,7 +144,8 @@ app.get("/login", (req, res) => {
   if (req.session.userId) {
     res.redirect("/");
   } else {
-    res.render("login_form"); //or home?
+    let templateVars = { user : null };
+    res.render("login_form", templateVars);
   }
 });
 
@@ -155,7 +154,7 @@ app.post("/login", (req, res) => {
     if (req.body.email === users[user].email) {
       if (bcrypt.compareSync(req.body.password, users[user].password)) {
         req.session.userId = user;
-        res.redirect("/"); //or home?
+        res.redirect("/");
         return;
       }
     }
@@ -165,7 +164,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/"); //or home?
+  res.redirect("/");
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -207,7 +206,8 @@ app.get("/register", (req, res) => {
   if (req.session.userId) {
     res.redirect("/");
   } else {
-    res.render("register_form");
+    let templateVars = {user : null};
+    res.render("register_form", templateVars);
   }
 });
 
