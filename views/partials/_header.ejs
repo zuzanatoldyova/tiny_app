@@ -4,12 +4,12 @@
     <td>
       <% if(user) { %>
         <div>
-          <form action="/logout" method="POST">
+          <form action="/logout" method="POST" style="margin-top: 20px">
             <input type="submit" value="Log out">
             <span> "hello <%= user.email %>" </span>
           </form>
         </div>
-        <div>
+        <div style="margin-top: 15px" >
           <a href="/urls"> My links </a>
         </div>
       <% } else { %>
