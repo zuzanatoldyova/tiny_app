@@ -1,13 +1,12 @@
 const express = require("express");
-const app = express();
-let PORT = process.env.PORT || 8080; // default port 8080
-
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const cookieSession = require("cookie-session");
 const methodOverride = require('method-override');
 
-const s = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+let PORT = process.env.PORT || 8080;
+
+const characterString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 const errorNotLoggedIn = '<html><body>You are not logged in <a href="/login"> Log in here </a></body></html>\n'
 
@@ -41,6 +40,7 @@ const users = {
   }
 };
 
+const app = express();
 app.set("view engine", "ejs");
 
 // Middlewares
@@ -52,13 +52,13 @@ app.use(cookieSession({
 app.use(methodOverride('_method'));
 
 function generateRandomString() {
-  return Array(6).join().split(',').map(function() {
-    return s.charAt(Math.floor(Math.random() * s.length));
+  return new Array(6).join(',').split(',').map(function() {
+    return characterString.charAt(Math.floor(Math.random() * characterString.length));
   }).join('');
 }
 
 function ensureHTTP(input) {
-  if (input.substring(0, 7) !== "http://" && input.substring(0, 8) !== "https://") {
+  if (!(input.startsWith("http://")) && !(input.startsWith("https://"))) {
     input = "http://" + input;
   }
   return input;
@@ -66,9 +66,6 @@ function ensureHTTP(input) {
 
 function findUserUrls(userId) {
   let userUrls = {};
-  if (!userId) {
-    return undefined;
-  }
   for (let url in urlDatabase) {
     if (urlDatabase[url].userId === userId) {
       userUrls[url] = urlDatabase[url];
@@ -128,7 +125,7 @@ app.post("/urls", checkLogin, (req, res) => {
 app.get("/urls/new", checkLogin, (req, res) => {
   let templateVars = {
     user: users[req.session.userId]
-  }
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -171,6 +168,8 @@ app.post("/login", (req, res) => {
         req.session.userId = user;
         res.redirect("/");
         return;
+      } else {
+        break;
       }
     }
   }
@@ -187,10 +186,7 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(404).end('<html><body>Url does not exist</body></html>\n');
   } else {
     let urlId = req.params.shortURL;
-
-    // console.log(req.session.urlId);
     if (!req.session[urlId]) {
-      console.log(urlDatabase[urlId]);
       urlDatabase[urlId].uniqueVisits += 1;
       req.session[urlId] = generateRandomString();
       urlDatabase[urlId].record.push({
@@ -207,7 +203,6 @@ app.get("/u/:shortURL", (req, res) => {
     }
     let longURL = urlDatabase[req.params.shortURL][req.params.shortURL];
     urlDatabase[req.params.shortURL].visits += 1;
-    console.log(urlDatabase[req.params.shortURL]);
     res.redirect(longURL);
   }
 });
@@ -219,9 +214,9 @@ app.post("/register", (req, res) => {
     res.status(400).end("Email and password are required");
   }
   for (var userId in users) {
-      if (users[userId].email === req.body.email) {
-        error = true;
-        res.status(400).end("Email already used");
+    if (users[userId].email === req.body.email) {
+      error = true;
+      res.status(400).end("Email already used");
     }
   }
   if (!error) {

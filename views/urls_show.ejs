@@ -19,7 +19,18 @@
         <td><%= url.uniqueVisits %></td>
       </tr>
     </table>
-    <h3> Statistics for this url </h3>
+    <table>
+      <form action="/urls/<%= shortURL%>?_method=PUT" method="POST">
+        <input id="URL" type="text" name="update" value="<%= url[shortURL]%>" style="width: 300px">
+        <input type="submit" value="Update" style="margin-left
+        : 10px">
+      </form>
+      <form method="POST" action="/urls/<%= shortURL%>/delete?_method=DELETE">
+        <input type="submit" value="Delete" style="margin-left
+        : 10px">
+      </form>
+    </table>
+    <h3 style="margin-top: 30px "> Statistics for this url </h3>
     <table class="table">
       <tr>
         <th> User ID </th>
@@ -37,17 +48,6 @@
         <td><%= visit.timestamp.toLocaleString() %></td>
       <% } %>
       </tr>
-    </table>
-    <table>
-      <form action="/urls/<%= shortURL%>?_method=PUT" method="POST">
-        <input id="URL" type="text" name="update" value="<%= url.shortURL%>" style="width: 300px">
-        <input type="submit" value="Update" style="margin-left
-        : 10px">
-      </form>
-      <form method="POST" action="/urls/<%= shortURL%>/delete?_method=DELETE">
-        <input type="submit" value="Delete" style="margin-left
-        : 10px">
-      </form>
     </table>
   </body>
 </html>
